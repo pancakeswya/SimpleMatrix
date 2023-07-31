@@ -1,2 +1,2 @@
-# BasicMatrix
+# SimpleMatrix
 Implementation of matrix class
