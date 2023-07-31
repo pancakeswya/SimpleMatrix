@@ -11,7 +11,12 @@ Matrix::Matrix(int rows, int cols) : rows_(rows), cols_(cols) {
     throw std::out_of_range("Error: Invalid number of rows or columns");
   }
   matrix_ = new double*[rows];
-  matrix_[0] = new double[rows * cols]();
+  try {
+    matrix_[0] = new double[rows * cols]();
+  } catch (std::bad_alloc& exc) {
+    delete matrix_;
+    throw;
+  }
   for (int i = 0; i < rows; i++) {
     matrix_[i] = matrix_[0] + i * cols;
   }
