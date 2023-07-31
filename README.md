@@ -1,2 +1,2 @@
 # SimpleMatrix
-Implementation of matrix class
+Implementation of matrix class.
