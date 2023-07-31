@@ -200,7 +200,7 @@ Matrix& Matrix::operator*=(const Matrix& other) {
   return *this;
 }
 
-double Matrix::operator()(int row, int col) const {
+const double& Matrix::operator()(int row, int col) const {
   return GetElement(row, col);
 }
 
