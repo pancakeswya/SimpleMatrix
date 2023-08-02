@@ -7,7 +7,7 @@
 namespace s21 {
 
 Matrix::Matrix(int rows, int cols) : rows_(rows), cols_(cols) {
-  if (rows < minSize || cols < minSize) {
+  if (rows < kMinSize || cols < kMinSize) {
     throw std::out_of_range("Error: Invalid number of rows or columns");
   }
   matrix_ = new double*[rows];
@@ -22,7 +22,7 @@ Matrix::Matrix(int rows, int cols) : rows_(rows), cols_(cols) {
   }
 }
 
-Matrix::Matrix() : Matrix(minSize, minSize) {}
+Matrix::Matrix() : Matrix(kMinSize, kMinSize) {}
 
 Matrix::Matrix(const Matrix& other) : Matrix(other.rows_, other.cols_) {
   for (int i = 0; i < other.rows_; i++) {
@@ -33,8 +33,7 @@ Matrix::Matrix(const Matrix& other) : Matrix(other.rows_, other.cols_) {
 Matrix::Matrix(Matrix&& other) noexcept
     : matrix_(other.matrix_), rows_(other.rows_), cols_(other.cols_) {
   other.matrix_ = nullptr;
-  other.rows_ = 0;
-  other.cols_ = 0;
+  other.rows_ = other.cols_ = 0;
 }
 
 Matrix::~Matrix() {
@@ -50,7 +49,7 @@ bool Matrix::EqMatrix(const Matrix& other) const noexcept {
   }
   for (int i = 0; i < rows_; i++) {
     for (int j = 0; j < cols_; j++) {
-      if (fabs(matrix_[i][j] - other.matrix_[i][j]) > epsilon) {
+      if (fabs(matrix_[i][j] - other.matrix_[i][j]) > kEpsilon) {
         return false;
       }
     }
@@ -101,7 +100,7 @@ void Matrix::MulMatrix(const Matrix& other) {
       }
     }
   }
-  SwapMatrix(tmp);
+  Swap(tmp);
 }
 
 double Matrix::Determinant() const {
@@ -124,7 +123,7 @@ Matrix Matrix::Transpose() const {
 Matrix Matrix::CalcComplements() const {
   if (rows_ != cols_) {
     throw std::invalid_argument("Error: Matrix is not square");
-  } else if (rows_ == minSize) {
+  } else if (rows_ == kMinSize) {
     throw std::invalid_argument("Error: Rows value should be greater than 1");
   }
   Matrix result(rows_, cols_);
@@ -140,10 +139,10 @@ Matrix Matrix::CalcComplements() const {
 Matrix Matrix::InverseMatrix() const {
   Matrix result(cols_, rows_);
   double det = Determinant();
-  if (fabs(det) < epsilon) {
+  if (fabs(det) < kEpsilon) {
     throw std::invalid_argument("Error: Determinant of this matrix is equal 0");
   }
-  if ((cols_ == minSize) && (rows_ == minSize)) {
+  if (cols_ == kMinSize && rows_ == kMinSize) {
     result.matrix_[0][0] = 1.0 / matrix_[0][0];
   } else {
     result = CalcComplements().Transpose() * (1.0 / det);
@@ -184,14 +183,18 @@ Matrix& Matrix::operator-=(const Matrix& other) {
 }
 
 Matrix& Matrix::operator=(const Matrix& other) {
-  Matrix tmp(other);
-  SwapMatrix(tmp);
+  if (this != &other) {
+    Matrix tmp(other);
+    Swap(tmp);
+  }
   return *this;
 }
 
 Matrix& Matrix::operator=(Matrix&& other) noexcept {
   Matrix tmp(std::move(other));
-  SwapMatrix(tmp);
+  if (this != &other) {
+    Swap(tmp);
+  }
   return *this;
 }
 
@@ -206,17 +209,25 @@ Matrix& Matrix::operator*=(const Matrix& other) {
 }
 
 const double& Matrix::operator()(int row, int col) const {
-  return GetElement(row, col);
+  if (!IsValidIndices(row, col)) {
+    throw std::out_of_range("Error: Invalid value of rows or columns");
+  }
+  return matrix_[row][col];
 }
 
-double& Matrix::operator()(int row, int col) { return GetElement(row, col); }
+double& Matrix::operator()(int row, int col) {
+  if (!IsValidIndices(row, col)) {
+    throw std::out_of_range("Error: Invalid value of rows or columns");
+  }
+  return matrix_[row][col];
+}
 
 int Matrix::GetRows() const noexcept { return rows_; }
 
 int Matrix::GetCols() const noexcept { return cols_; }
 
 void Matrix::SetCols(int cols) {
-  if (cols < minSize) {
+  if (cols < kMinSize) {
     throw std::out_of_range("Error: Invalid number of cols");
   }
   Matrix tmp(rows_, cols);
@@ -224,11 +235,11 @@ void Matrix::SetCols(int cols) {
   for (int i = 0; i < rows_; i++) {
     memcpy(tmp.matrix_[i], matrix_[i], cols_to_copy * sizeof(double));
   }
-  SwapMatrix(tmp);
+  Swap(tmp);
 }
 
 void Matrix::SetRows(int rows) {
-  if (rows < minSize) {
+  if (rows < kMinSize) {
     throw std::out_of_range("Error: Invalid number of rows");
   }
   Matrix tmp(rows, cols_);
@@ -236,7 +247,7 @@ void Matrix::SetRows(int rows) {
   for (int i = 0; i < rows_to_copy; i++) {
     memcpy(tmp.matrix_[i], matrix_[i], cols_ * sizeof(double));
   }
-  SwapMatrix(tmp);
+  Swap(tmp);
 }
 
 Matrix Matrix::GetMinor(int row, int col) const {
@@ -272,25 +283,18 @@ double Matrix::GetDet() const {
   return determinant;
 }
 
-inline double& Matrix::GetElement(int row, int col) const {
-  if (!ValidIndices(row, col)) {
-    throw std::out_of_range("Error: Invalid value of rows or columns");
-  }
-  return matrix_[row][col];
-}
-
-inline void Matrix::SwapMatrix(Matrix& other) noexcept {
+inline void Matrix::Swap(Matrix& other) noexcept {
   std::swap(matrix_, other.matrix_);
   std::swap(rows_, other.rows_);
   std::swap(cols_, other.cols_);
 }
 
-inline bool Matrix::ValidIndices(int row, int col) const noexcept {
+inline bool Matrix::IsValidIndices(int row, int col) const noexcept {
   return (row < rows_) && (col < cols_) && (row >= 0) && (col >= 0);
 }
 
 inline bool Matrix::SizeIsEqual(const Matrix& rhs) const noexcept {
-  return (rows_ == rhs.rows_) && (cols_ == rhs.cols_);
+  return rows_ == rhs.rows_ && cols_ == rhs.cols_;
 }
 
 Matrix operator*(double lhs, const Matrix& rhs) {

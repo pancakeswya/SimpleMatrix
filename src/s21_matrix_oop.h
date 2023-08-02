@@ -35,15 +35,14 @@ class Matrix {
   int GetCols() const noexcept;
   void SetCols(int);
   void SetRows(int);
+  void Swap(Matrix&) noexcept;
 
  private:
-  static constexpr int minSize = 1;
-  static constexpr double epsilon = 1e-07;
+  static constexpr int kMinSize = 1;
+  static constexpr double kEpsilon = 1e-07;
   Matrix GetMinor(int, int) const;
   double GetDet() const;
-  double& GetElement(int, int) const;
-  void SwapMatrix(Matrix&) noexcept;
-  bool ValidIndices(int, int) const noexcept;
+  bool IsValidIndices(int, int) const noexcept;
   bool SizeIsEqual(const Matrix&) const noexcept;
   double** matrix_;
   int rows_, cols_;
