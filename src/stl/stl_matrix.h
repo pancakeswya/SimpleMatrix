@@ -48,24 +48,24 @@ class matrix {
 
   matrix() = default;
   matrix(std::initializer_list<std::initializer_list<Tp>> const& list)
-    : m_rows(list.size()), m_cols(list.begin()->size()) {
+    : rows_(list.size()), cols_(list.begin()->size()) {
     for (auto& i : list) {
-      assert(i.size() == m_cols);
+      assert(i.size() == cols_);
       for (auto& j : i) {
-        m_data.push_back(j);
+        data_.push_back(j);
       }
     }
   }
 
   matrix(size_type rows, size_type cols)
-    : m_rows(rows), m_cols(cols), m_data(rows * cols) {}
+    : rows_(rows), cols_(cols), data_(rows * cols) {}
 
   matrix(const matrix& other)
-    : m_rows(other.m_rows), m_cols(other.m_cols), m_data(other.m_data) {}
+    : rows_(other.rows_), cols_(other.cols_), data_(other.data_) {}
 
   matrix(matrix&& other) noexcept
-    : m_rows(other.m_rows), m_cols(other.m_cols), m_data(std::move(other.m_data)) {
-    other.m_rows = other.m_cols = 0;
+    : rows_(other.rows_), cols_(other.cols_), data_(std::move(other.data_)) {
+    other.rows_ = other.cols_ = 0;
   }
 
   matrix& operator=(const matrix& other) {
@@ -85,68 +85,68 @@ class matrix {
   }
 
   void swap(matrix& other) noexcept {
-    std::swap(m_rows, other.m_rows);
-    std::swap(m_cols, other.m_cols);
-    std::swap(m_data, other.m_data);
+    std::swap(rows_, other.rows_);
+    std::swap(cols_, other.cols_);
+    std::swap(data_, other.data_);
   }
 
   iterator begin() noexcept {
-    return m_data.begin();
+    return data_.begin();
   }
 
   const_iterator begin() const noexcept {
-    return m_data.begin();
+    return data_.begin();
   }
 
   iterator end() noexcept {
-    return m_data.end();
+    return data_.end();
   }
 
   const_iterator end() const noexcept {
-    return m_data.end();
+    return data_.end();
   }
 
   void clear() noexcept {
-    m_data.clear();
-    m_cols = m_rows = 0;
+    data_.clear();
+    cols_ = rows_ = 0;
   }
 
   pointer operator[](size_type row) noexcept {
-    return &m_data[row * m_cols];
+    return &data_[row * cols_];
   }
 
   const_pointer operator[](size_type row) const noexcept {
-    return &m_data[row * m_cols];
+    return &data_[row * cols_];
   }
 
   reference at(size_type row, size_type col) {
-    if (row > m_rows || col > m_cols) {
+    if (row > rows_ || col > cols_) {
       throw std::out_of_range("operator[]. Row or col is out of range");
     }
-    return m_data[row * m_cols + col];
+    return data_[row * cols_ + col];
   }
 
   const_reference at(size_type row, size_type col) const {
-    if (row > m_rows || col > m_cols) {
+    if (row > rows_ || col > cols_) {
       throw std::out_of_range("operator[]. Row or col is out of range");
     }
-    return m_data[row * m_cols + col];
+    return data_[row * cols_ + col];
   }
 
   size_type rows() const noexcept {
-    return m_rows;
+    return rows_;
   }
 
   size_type cols() const noexcept {
-    return m_cols;
+    return cols_;
   }
 
   bool equal(const matrix& other) const noexcept {
     if (!size_is_equal(other)) {
       return false;
     }
-    for (size_type i = 0; i < m_data.size(); ++i) {
-      if (!is_equal(m_data[i], other.m_data[i])) {
+    for (size_type i = 0; i < data_.size(); ++i) {
+      if (!is_equal(data_[i], other.data_[i])) {
         return false;
       }
     }
@@ -157,8 +157,8 @@ class matrix {
     if (!size_is_equal(other)) {
       throw std::invalid_argument("Sum. Different sizes of matrices");
     }
-    for (size_type i = 0; i < m_data.size(); ++i) {
-        m_data[i] += other.m_data[i];
+    for (size_type i = 0; i < data_.size(); ++i) {
+        data_[i] += other.data_[i];
     }
   }
 
@@ -166,26 +166,26 @@ class matrix {
     if (!size_is_equal(other)) {
       throw std::invalid_argument("Sub. Different sizes of matrices");
     }
-    for (int i = 0; i < m_data.size(); ++i) {
-        m_data[i] -= other.m_data[i];
+    for (int i = 0; i < data_.size(); ++i) {
+        data_[i] -= other.data_[i];
     }
   }
 
   void multiply(const Tp& value) noexcept {
-    for (int i = 0; i < m_data.size(); ++i) {
-        m_data[i] *= value;
+    for (int i = 0; i < data_.size(); ++i) {
+        data_[i] *= value;
     }
   }
 
   void multiply(const matrix& other) {
-    if (m_cols != other.m_rows || m_rows != other.m_cols) {
+    if (cols_ != other.rows_ || rows_ != other.cols_) {
       throw std::invalid_argument(
           "Multiply. First matrix cols != Second matrix rows or vice versa");
     }
-    matrix tmp(m_rows, other.m_cols);
-    for (size_type i = 0; i < m_rows; ++i) {
-      for (size_type j = 0; j < other.m_cols; ++j) {
-        for (size_type m = 0; m < other.m_rows; ++m) {
+    matrix tmp(rows_, other.cols_);
+    for (size_type i = 0; i < rows_; ++i) {
+      for (size_type j = 0; j < other.cols_; ++j) {
+        for (size_type m = 0; m < other.rows_; ++m) {
           tmp[i][j] += (*this)[i][m] * other[m][j];
         }
       }
@@ -194,16 +194,16 @@ class matrix {
   }
 
   value_type determinant() const {
-    if (m_rows != m_cols) {
+    if (rows_ != cols_) {
       throw std::invalid_argument("Determinant. Matrix is not square");
     }
     return det();
   }
 
   matrix transpose() const {
-    matrix result(m_cols, m_rows);
-    for (size_type i = 0; i < m_rows; ++i) {
-      for (size_type j = 0; j < m_cols; ++j) {
+    matrix result(cols_, rows_);
+    for (size_type i = 0; i < rows_; ++i) {
+      for (size_type j = 0; j < cols_; ++j) {
         result[j][i] = (*this)[i][j];
       }
     }
@@ -211,14 +211,14 @@ class matrix {
   }
 
   matrix complements() const {
-    if (m_rows != m_cols) {
+    if (rows_ != cols_) {
       throw std::invalid_argument("Compliments: Matrix is not square");
-    } else if (m_rows == 1) {
+    } else if (rows_ == 1) {
       throw std::invalid_argument("Compliment: Rows value should be greater than 1");
     }
-    matrix result(m_rows, m_cols);
-    for (size_type i = 0; i < m_rows; ++i) {
-      for (size_type j = 0; j < m_cols; ++j) {
+    matrix result(rows_, cols_);
+    for (size_type i = 0; i < rows_; ++i) {
+      for (size_type j = 0; j < cols_; ++j) {
         result[i][j] = std::pow(-1.0, i + j) * minor(i, j).determinant();
       }
     }
@@ -226,13 +226,13 @@ class matrix {
   }
 
   matrix inverse() const {
-    matrix result(m_cols, m_rows);
+    matrix result(cols_, rows_);
     value_type det = determinant();
     if (is_equal(det, 0)) {
       throw std::invalid_argument("Inverse: Determinant of this matrix is equal 0");
     }
-    if (m_cols == 1 && m_rows == 1) {
-      result[0][0] = 1.0 / m_data[0];
+    if (cols_ == 1 && rows_ == 1) {
+      result[0][0] = 1.0 / data_[0];
     } else {
       result = complements().transpose() * (1.0 / det);
     }
@@ -299,16 +299,16 @@ class matrix {
 
  protected:
   bool size_is_equal(const matrix& other) const noexcept {
-    return m_rows == other.m_rows && m_cols == other.m_cols;
+    return rows_ == other.rows_ && cols_ == other.cols_;
   }
 
   matrix minor(size_type row, size_type col) const {
-    matrix minor(m_rows - 1, m_cols - 1);
+    matrix minor(rows_ - 1, cols_ - 1);
     size_type sub_i = 0, sub_j;
-    for (size_type i = 0; i < m_rows; ++i) {
+    for (size_type i = 0; i < rows_; ++i) {
       sub_j = 0;
       if (i != row) {
-        for (size_type j = 0; j < m_cols; ++j) {
+        for (size_type j = 0; j < cols_; ++j) {
           if (j != col) {
             minor[sub_i][sub_j++] = (*this)[i][j];
           }
@@ -321,14 +321,14 @@ class matrix {
 
   value_type det() const {
     value_type dtr;
-    if (m_rows == 1) {
-      dtr = m_data[0];
-    } else if (m_rows == 2) {
-      dtr = m_data[0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
+    if (rows_ == 1) {
+      dtr = data_[0];
+    } else if (rows_ == 2) {
+      dtr = data_[0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
     } else {
       int sign = 1;
-      for (size_type i = 0; i < m_rows;) {
-        dtr = sign * m_data[i++] * minor(0, i).det();
+      for (size_type i = 0; i < rows_;) {
+        dtr = sign * data_[i++] * minor(0, i).det();
         sign = -sign;
       }
     }
@@ -336,9 +336,9 @@ class matrix {
   }
 
  private:
-  size_type m_rows{};
-  size_type m_cols{};
-  std::vector<Tp> m_data;
+  size_type rows_{};
+  size_type cols_{};
+  std::vector<Tp> data_;
 };
 
 
