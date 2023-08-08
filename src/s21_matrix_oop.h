@@ -5,6 +5,9 @@ namespace s21 {
 
 class Matrix {
  public:
+  using iterator = double*;
+  using const_iterator = const double*;
+
   explicit Matrix(int, int);
   Matrix();
   Matrix(const Matrix&);
@@ -31,11 +34,16 @@ class Matrix {
   Matrix& operator*=(double);
   const double& operator()(int, int) const;
   double& operator()(int, int);
+  double* operator[](int row);
   int GetRows() const noexcept;
   int GetCols() const noexcept;
   void SetCols(int);
   void SetRows(int);
   void Swap(Matrix&) noexcept;
+  iterator begin() noexcept;
+  const_iterator begin() const noexcept;
+  iterator end() noexcept;
+  const_iterator end() const noexcept;
 
  private:
   static constexpr int kMinSize = 1;

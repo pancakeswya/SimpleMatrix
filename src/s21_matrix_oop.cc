@@ -222,6 +222,26 @@ double& Matrix::operator()(int row, int col) {
   return matrix_[row][col];
 }
 
+double* Matrix::operator[](int row) {
+  return matrix_[row];
+}
+
+Matrix::iterator Matrix::begin() noexcept {
+  return iterator(&matrix_[0][0]);
+}
+
+Matrix::const_iterator Matrix::begin() const noexcept {
+  return const_iterator(&matrix_[0][0]);
+}
+
+Matrix::iterator Matrix::end() noexcept {
+  return iterator(&matrix_[0][rows_ * cols_]);
+}
+
+Matrix::const_iterator Matrix::end() const noexcept {
+  return const_iterator(&matrix_[0][rows_ * cols_]);
+}
+
 int Matrix::GetRows() const noexcept { return rows_; }
 
 int Matrix::GetCols() const noexcept { return cols_; }
