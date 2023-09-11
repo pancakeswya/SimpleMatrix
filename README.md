@@ -51,5 +51,5 @@ And you also need to overload the following operators, partly corresponding to t
     // stl style
     s21::matrix<int> mat(5,5);
     mat[0][1] = 5;
-    auto res2 = mat.Transpose();
+    auto res2 = mat.transpose();
 ```
