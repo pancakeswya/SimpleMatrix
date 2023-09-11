@@ -32,7 +32,6 @@ class matrix {
   using iterator = typename std::vector<Tp>::iterator;
   using const_iterator = typename std::vector<Tp>::const_iterator;
 
-  // not ideal comparators
   template<typename T>
   std::enable_if_t<std::is_floating_point_v<T>, bool>
   is_equal(const T& rhs, const T& lhs) const noexcept {
@@ -45,8 +44,9 @@ class matrix {
     return rhs == lhs;
   }
 
-
   matrix() = default;
+  ~matrix() = default;
+
   matrix(std::initializer_list<std::initializer_list<Tp>> const& list)
     : rows_(list.size()), cols_(list.begin()->size()) {
     for (auto& i : list) {
@@ -178,9 +178,9 @@ class matrix {
   }
 
   void multiply(const matrix& other) {
-    if (cols_ != other.rows_ || rows_ != other.cols_) {
+    if (cols_ != other.rows_) {
       throw std::invalid_argument(
-          "Multiply. First matrix cols != Second matrix rows or vice versa");
+          "Multiply. First matrix cols != Second matrix rows");
     }
     matrix tmp(rows_, other.cols_);
     for (size_type i = 0; i < rows_; ++i) {
@@ -285,18 +285,6 @@ class matrix {
     return *this;
   }
 
-  friend matrix operator*(value_type lhs, const matrix& rhs) {
-    matrix tmp(rhs);
-    tmp *= lhs;
-    return tmp;
-  }
-
-  friend matrix operator*(const matrix& lhs, value_type rhs) {
-    matrix tmp(lhs);
-    tmp *= rhs;
-    return tmp;
-  }
-
  protected:
   bool size_is_equal(const matrix& other) const noexcept {
     return rows_ == other.rows_ && cols_ == other.cols_;
@@ -340,6 +328,20 @@ class matrix {
   size_type cols_{};
   std::vector<Tp> data_;
 };
+
+template<typename Tp>
+matrix<Tp> operator*(Tp lhs, const matrix<Tp>& rhs) {
+  matrix<Tp> tmp(rhs);
+  tmp *= lhs;
+  return tmp;
+}
+
+template<typename Tp>
+matrix<Tp> operator*(const matrix<Tp>& lhs, Tp rhs) {
+  matrix<Tp> tmp(lhs);
+  tmp *= rhs;
+  return tmp;
+}
 
 
 } // namespace stl

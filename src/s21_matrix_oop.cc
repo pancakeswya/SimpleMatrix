@@ -88,9 +88,9 @@ void Matrix::MulNumber(double num) noexcept {
 }
 
 void Matrix::MulMatrix(const Matrix& other) {
-  if (cols_ != other.rows_ || rows_ != other.cols_) {
+  if (cols_ != other.rows_) {
     throw std::invalid_argument(
-        "Error: First matrix cols != Second matrix rows or vice versa");
+        "Error: First matrix cols != Second matrix rows");
   }
   Matrix tmp(rows_, other.cols_);
   for (int i = 0; i < rows_; i++) {
@@ -222,13 +222,9 @@ double& Matrix::operator()(int row, int col) {
   return matrix_[row][col];
 }
 
-double* Matrix::operator[](int row) {
-  return matrix_[row];
-}
+double* Matrix::operator[](int row) { return matrix_[row]; }
 
-Matrix::iterator Matrix::begin() noexcept {
-  return iterator(&matrix_[0][0]);
-}
+Matrix::iterator Matrix::begin() noexcept { return iterator(&matrix_[0][0]); }
 
 Matrix::const_iterator Matrix::begin() const noexcept {
   return const_iterator(&matrix_[0][0]);
