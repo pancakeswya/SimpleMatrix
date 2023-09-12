@@ -1,5 +1,5 @@
 # SimpleMatrix
-Implementation of matrix class + bonus template matrix made in stl style.
+Implementation of matrix class + bonus template matrix made in stl style. 
 ## Matrix operations
 
 There is a brief description of the matrix operations below that need to be implemented in the developing library.
