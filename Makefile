@@ -55,7 +55,7 @@ check-style:
 	clang-format -style=google -n $(SRC_DIR)/*.cc  $(INC_DIR)/*.h
 
 gcov_report: $(NAME)
-	$(CXX) $(CXXFLAGS) $(GCOV) -I $(INC_DIR) $(TEST_SRCS) $(SRCS) $(TEST_LDLIB) $(LDFLAGS) $< -o $(TEST_NAME)
+	$(CXX) $(CXXFLAGS) $(GCOV) $(TEST_SRCS) $(SRCS) $(TEST_LDLIB) $(LDFLAGS) $< -o $(TEST_NAME)
 	./$(TEST_NAME)
 	$(LCOV) -t $(TEST_NAME) -d . -o $(LCOV_NAME)
 	genhtml $(LCOV_NAME) -o $(REPORT_DIR)
